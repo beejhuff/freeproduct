@@ -119,8 +119,9 @@ class C4B_Freeproduct_Model_Observer
 
         $qty = (integer) $rule->getDiscountAmount();
         if ($qty) {
-            $freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), $qty);
-            self::_addAndApply($quote, $freeItem, $rule);
+            if ($freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), $qty)) {
+                self::_addAndApply($quote, $freeItem, $rule);
+            }
         }
     }
 
@@ -142,6 +143,9 @@ class C4B_Freeproduct_Model_Observer
         }
 
         $product = Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
+        if (!($product instanceof Mage_Catalog_Model_Product)) {
+            return;
+        }
         Mage::getModel('cataloginventory/stock_item')->assignProduct($product);
         $quoteItem = Mage::getModel('sales/quote_item')->setProduct($product);
         $quoteItem->setQuote($quote)
